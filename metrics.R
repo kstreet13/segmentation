@@ -28,6 +28,7 @@ s1 <- read10xCounts("data/xenium/output-XETG00402__0054800__Region_1__20250822__
 # 6 types of gene: Gene Expression, Negative Control Probe, Genomic Control, Negative Control Codeword, Unassigned Codeword, Deprecated Codeword
 ###
 s1 <- s1[which(rowData(s1)$Type == 'Gene Expression'), ]
+log1p(10000*t(t(assay(s1,'counts')) / colSums(assay(s1,'counts'))))
 
 
 ###############################

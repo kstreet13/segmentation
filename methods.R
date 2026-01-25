@@ -41,7 +41,7 @@ method1 <- function(refRNA, ST){
 ###############################
 # (2) continuous measure of co-expression: log(obs% / exp%), pearson correlation
 # between scRNA and ST
-# ""
+# "co-expression correlation"?
 ###############################
 
 # refRNA <- rna
@@ -51,34 +51,67 @@ method2 <- function(refRNA, ST){
     # restrict gene set to intersection
     genes <- rownames(ST)[which(rownames(ST) %in% rownames(refRNA))]
     refRNA <- refRNA[genes, ]
+    
+    # only keep genes expressed in at least 20 cells in RNA
+    nzRNA <- assay(refRNA,'counts') > 0
+    keep <- which(rowSums(nzRNA) > 20)
+    genes <- genes[keep]
+    
+    refRNA <- refRNA[genes, ]
     ST <- ST[genes, ]
     
     # scRNA co-expression
-    nz <- assay(refRNA,'counts') > 0
-    obsRNA <- tcrossprod(nz) / ncol(refRNA) # how often genes are co-expressed (% of cells)
+    nzRNA <- assay(refRNA,'counts') > 0
+    obsRNA <- tcrossprod(nzRNA) / ncol(refRNA) # how often genes are co-expressed (% of cells)
     obsRNA[which(obsRNA < 0.01/ncol(refRNA))] <- 0.01/ncol(refRNA) # floor (can't take log of 0)    
-    expRNA <- outer(rowMeans(nz), rowMeans(nz))
+    expRNA <- outer(rowMeans(nzRNA), rowMeans(nzRNA))
     expRNA[which(expRNA < 0.01/ncol(refRNA))] <- 0.01/ncol(refRNA) # floor (can't divide by 0)
     loRNA <- log(obsRNA) - log(expRNA)
-    rm(nz,obsRNA,expRNA)
+    diag(loRNA) <- NA
+    rm(nzRNA,obsRNA,expRNA)
     
     # ST co-expression
-    nz <- assay(ST,'counts') > 0
-    obsST <- tcrossprod(nz) / ncol(ST) # how often genes are co-expressed (% of cells)
+    nzST <- assay(ST,'counts') > 0
+    obsST <- tcrossprod(nzST) / ncol(ST) # how often genes are co-expressed (% of cells)
     obsST[which(obsST < 0.01/ncol(ST))] <- 0.01/ncol(ST) # floor (can't take log of 0)    
-    expST <- outer(rowMeans(nz), rowMeans(nz))
+    expST <- outer(rowMeans(nzST), rowMeans(nzST))
     expST[which(expST < 0.01/ncol(ST))] <- 0.01/ncol(ST) # floor (can't divide by 0)
     loST <- log(obsST) - log(expST)
-    rm(nz,obsST,expST)
+    diag(loST) <- NA
+    rm(nzST,obsST,expST)
     
-    return(cor(as.numeric(loRNA),as.numeric(loST)))
+    return(cor(as.numeric(loRNA),as.numeric(loST), use = 'complete.obs'))
 }
 
 
 
-x <- as.numeric(loRNA)
-y <- as.numeric(loST)
-ind <- which(abs(loRNA)>2 | abs(loST)>2)
-plot(x[ind],y[ind], col=rgb(0,0,0,.1), asp=1)
+###############################
+# # (3) project to circle (cosine distance?) + KL divergence?
+# ""
+###############################
+
+method3 <- function(refRNA, ST){
+    # restrict gene set to intersection
+    genes <- rownames(ST)[which(rownames(ST) %in% rownames(refRNA))]
+    refRNA <- refRNA[genes, ]
+    ST <- ST[genes, ]
+    
+    # project onto circle
+    sizes <- sqrt(colSums(assay(refRNA,'logcounts')^2))
+    circRNA <- t(t(assay(refRNA,'logcounts')) / sizes)
+    sizes <- sqrt(colSums(assay(refST,'logcounts')^2))
+    circST <- t(t(assay(refRNA,'logcounts')) / sizes)
+    
+    
+    
+
+    return()
+}
+
+
+
+
+
+
 
 
