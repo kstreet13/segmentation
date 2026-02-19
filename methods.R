@@ -118,7 +118,7 @@ method3 <- function(refRNA, ST){
 ###############################
 
 
-method4 <- function(refRNA, ST){
+m4_integrate <- function(refRNA, ST){
     require(StabMap)
     require(Seurat)
     require(matrixStats)
@@ -136,7 +136,7 @@ method4 <- function(refRNA, ST){
     mod <- factor(rep(c('rna','st'),
                       times = c(ncol(assay_list$rna), ncol(assay_list$st))))
     
-    
+    return(list(x = stab, label = mod))
 }
 
 
