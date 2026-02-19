@@ -112,6 +112,35 @@ method3 <- function(refRNA, ST){
 
 
 
+###############################
+# # (4) integrate (StabMap/WNN), then batch integration metrics
+# ""
+###############################
+
+
+method4 <- function(refRNA, ST){
+    require(StabMap)
+    require(Seurat)
+    require(matrixStats)
+    rv <- rowVars(assay(refRNA,'logcounts'))
+    keep <- which(rv >= sort(rv, decreasing = TRUE)[2000] |
+                      rownames(refRNA) %in% rownames(ST))
+    rm(rv)
+    
+    assay_list <- list(rna = assay(refRNA,'logcounts')[keep,],
+                       st = assay(ST,'logcounts'))
+    # get joint embedding
+    stab <- stabMap(assay_list, reference_list = c("rna"),
+                    suppressMessages = FALSE, maxFeatures = nrow(assay_list$rna),
+                    plot = FALSE)
+    mod <- factor(rep(c('rna','st'),
+                      times = c(ncol(assay_list$rna), ncol(assay_list$st))))
+    
+    
+}
+
+
+
 
 
 

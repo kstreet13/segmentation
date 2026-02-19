@@ -17,7 +17,7 @@ rowData(rna)$ensemblID[grep('ENSMUSG', rownames(rna))] <- rownames(rna)[grep('EN
 rm(ensembl, gene_symbols, results)
 # switch rownames to Ensembl IDs
 rowData(rna)$Symbol <- rownames(rna)
-rownames(rna) <- rowData(rna)$ensemblID
+rownames(rna)[which(!is.na(rowData(rna)$ensemblID))] <- rowData(rna)$ensemblID[which(!is.na(rowData(rna)$ensemblID))]
 
 
 # read spatial data
@@ -28,8 +28,8 @@ s1 <- read10xCounts("data/xenium/output-XETG00402__0054800__Region_1__20250822__
 # 6 types of gene: Gene Expression, Negative Control Probe, Genomic Control, Negative Control Codeword, Unassigned Codeword, Deprecated Codeword
 ###
 s1 <- s1[which(rowData(s1)$Type == 'Gene Expression'), ]
-log1p(10000*t(t(assay(s1,'counts')) / colSums(assay(s1,'counts'))))
-
+assay(s1,'logcounts') <- Seurat::LogNormalize(data=assay(s1,'counts'))
+colnames(s1) <- s1$Barcode
 
 ###############################
 # metric ideas
