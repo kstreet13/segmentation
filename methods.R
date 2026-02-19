@@ -84,6 +84,55 @@ method2 <- function(refRNA, ST){
 }
 
 
+sparse.cor <- function(x){
+    n <- nrow(x)
+    m <- ncol(x)
+    ii <- unique(x@i)+1 # rows with a non-zero element
+    
+    Ex <- colMeans(x)
+    nozero <- as.vector(x[ii,]) - rep(Ex,each=length(ii))        # colmeans
+    
+    covmat <- ( crossprod(matrix(nozero,ncol=m)) +
+                    crossprod(t(Ex))*(n-length(ii))
+    )/(n-1)
+    sdvec <- sqrt(diag(covmat))
+    covmat/crossprod(t(sdvec))
+}
+method2.5 <- function(refRNA, ST){
+    # normalize
+    refRNA <- Seurat::LogNormalize(data = assay(refRNA,'counts'))
+    ST <- Seurat::LogNormalize(data = assay(ST,'counts'))
+    
+    # restrict gene set to intersection
+    genes <- rownames(ST)[which(rownames(ST) %in% rownames(refRNA))]
+    refRNA <- refRNA[genes, ]
+    
+    # only keep genes expressed in at least 100 cells in RNA
+    nzRNA <- refRNA > 0
+    keep <- which(rowSums(nzRNA) > 100)
+    genes <- genes[keep]
+    rm(nzRNA)
+    
+    refRNA <- refRNA[genes, ]
+    ST <- ST[genes, ]
+    
+    # scRNA co-expression
+    # corRNA <- cor(t(assay(refRNA,'logcounts'))) # can't do, no cor() for sparse matrix
+    refRNA <- t(refRNA)
+    corRNA <- sparse.cor(refRNA)
+    corRNA[lower.tri(corRNA)] <- NA
+    diag(lower.tri(corRNA)) <- NA
+
+    # ST co-expression
+    ST <- t(ST)
+    corST <- sparse.cor(ST)
+    corST[lower.tri(corST)] <- NA
+    diag(lower.tri(corST)) <- NA
+    
+    
+    return(cor(as.numeric(loRNA),as.numeric(loST), use = 'complete.obs'))
+}
+
 
 ###############################
 # # (3) project to circle (cosine distance?) + KL divergence?
