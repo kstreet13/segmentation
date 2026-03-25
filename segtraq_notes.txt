@@ -1,0 +1,32 @@
+Baseline metrics:
+probably want all of them
+distributions are interesting (esp. genes/counts per cell)
+also includes shape features
+
+Cluster stability:
+all seem reasonable
+ARI and cluster purity make most sense
+
+Region similarity:
+needs boundaries for nuclei
+not sure how helpful Intersection over Union (of area?) is
+expression similarity seems helpful
+correlation in expression with local neighborhood could be helpful
+
+Volume (3D):
+interesting idea
+requires z-coord of transcripts
+
+Supervised metrics:
+Probably the most interesting/relevant
+Focuses on neighborhood-relevant negative marker genes
+
+Point Statistics:
+not sure how valid this is
+do we expect transcripts to be mostly found near the nucleus?
+
+
+
+
+
+
