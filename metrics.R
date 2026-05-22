@@ -25,7 +25,7 @@ require(DropletUtils)
 # doesn't actually include locations
 s1 <- read10xCounts("data/xenium/output-XETG00402__0054800__Region_1__20250822__221946/cell_feature_matrix")
 ###
-# 6 types of gene: Gene Expression, Negative Control Probe, Genomic Control, Negative Control Codeword, Unassigned Codeword, Deprecated Codeword
+# 6 types of feature: Gene Expression, Negative Control Probe, Genomic Control, Negative Control Codeword, Unassigned Codeword, Deprecated Codeword
 ###
 s1 <- s1[which(rowData(s1)$Type == 'Gene Expression'), ]
 assay(s1,'logcounts') <- Seurat::LogNormalize(data=assay(s1,'counts'))
